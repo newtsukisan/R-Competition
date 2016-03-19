@@ -18,9 +18,43 @@
 
 # en el grupo de test obtenemos una acc de 0.6471861
 
-# como utilizar data.frames y which
+# Hemos añadido una variable de clustering al ajuste y eso no parece ser muy significativo
+# a la hora de ajustar el sistema. Podriamos intentar hacer solo un clustering de los datos
+# que no se responden y a partir de este punto ver que mas se podría hacer.
 
-df <- data.frame (a = 1:3, b = 71:73)
+# Lo siguiente que realizamos es un clustering de los clientes por sus datos personales.
+# para cada grupo que hemos creado de cluster, realizamos un modelo. De esta forma estamos
+# añadiendo complejidad al sistema y somos mas propensos a un overfitting. Nuestro parametro
+# de complejidad sería entonces el numero de cluster que realizamos.
 
-df[df == ""] <- "empty"
+# lo que pasa que cuando utilizamos un ramdom forest, obtenemos los mismos resultados. Luego
+# lo que sucede es que tenemos un caso de overfitting salvaje.
 
+# Quizas podriamos encontrar un grupo donde podamos encontrar una alta accuracy y a partir
+# de ese punto clasificar a los demas. Pero esto parece muy propenso al over fitting
+
+#  Cosas a probar. Boruta para la seleccion de features. 
+#  como podríamos obtener otros elementos importantes. 
+#  realizar un clustering pero normalizando los datos.
+#  cross validation para la seleccion de los parametros que tenemos.
+
+# 24-04-2014. Podemos guardar los modelos para utilizarlos luego. EL AUC de un random forest en el train es,
+# utilizando todos las variables de un 0.72. Tambien en el conjunto del test elaborado. Luego, quizas, realizando
+# una cross validation para encontrar un parametro mas adecuado, podriamos tener un  valor que no sea del todo malo
+
+# model/ramdom_forest_with_cluster.RData. Es un modelo que incluye todos las preguntas, un numero asignando el cluster
+# income para intentar predecir Happy. No incluye el resto de preguntas demograficas.
+
+# ramdom_forest_with_cluster_2.RData incluye todos los datos demograficos y la clasificacion de los clusters, como 
+# un numero del 1 al 7.
+
+# Se podría comprobar que pasa si creamos un cluster con todos los elementos.
+
+
+# 28-04-2014. Probamos a ver si podemos utilizar la biblioteca caret para validar la parte de los ramdonForest 
+# y de esta manera crear un modelo mas ajustado. De momento las pruebas que estamos realizando tardan y no llegan a
+# a dar ningun resultado.
+
+# 30-04-2014. Probamos crear las learning curves para ver si tenemos un caso de overfitting o un caso de 
+# de underfitting. Cuando solo incluimos una features los errores del grupo de validation y del grupo de 
+# training son altos y acaban pareciendose, sin existir un gap entre ellos. 

@@ -58,10 +58,6 @@ train$YOB[is.na(train$YOB)] <- 0
 # para reemplazar los factores tenemos que utilizar otras formas 
 
 
-train.fill$EducationLevel[train.fill$EducationLevel == ""] = ""
-is.factor (train.fill$EducationLevel)
-levels(train.fill$EducationLevel)
-
 
 # primer ajuste -----------------------------------------------------------
 library(caTools)
@@ -74,7 +70,7 @@ testSparse  = subset(train, split==FALSE)
 
 require (rpart)
 require (rpart.plot)
-model.tree <- rpart(Happy ~ ., data=trainSparse[,-2], method="class")
+model.tree <- rpart(Happy ~ ., data=trainSparse[,-c(1,2)], method="class")
 prp(model.tree)
 
 
@@ -82,6 +78,10 @@ prp(model.tree)
 train.predict <- predict(model.tree)[,2]
 getAcc(table(trainSparse$Happy, train.predict > 0.5))
 getAcc(table(trainSparse$Happy, train.predict > 0.55))
+
+require(ROCR)
+ROCRpred = prediction(train.predict, trainSparse$Happy);
+as.numeric(performance(ROCRpred, "auc")@y.values)
 
 # veamos cual es la prediccion con el modelo de linea base.
 table(trainSparse$Happy)
@@ -107,6 +107,8 @@ train(Happy ~ .,
 
 predict.test <- predict(model.tree, newdata = testSparse)[,2]
 getAcc(table(testSparse$Happy, predict.test > 0.5))
+ROCRpred = prediction(predict.test, testSparse$Happy);
+as.numeric(performance(ROCRpred, "auc")@y.values)
 
 
 # Tambien podemos utilizar un modelo con random forest.
@@ -114,14 +116,25 @@ require(randomForest)
 # Ahora utilizamos un randomforest
 set.seed(1000)
 radomb <- randomForest(Happy ~ . , data=trainSparse[,-2], method="class")
-predict.random.1 <- predict(radomb)
+predict.random.1    <- predict(radomb)
+predict.random.test <- predict(radomb, newdata = testSparse)
 getAcc(table(trainSparse$Happy, predict.random.1 > 0.5))
+
+ROCRpred = prediction(predict.random.1, trainSparse$Happy);
+as.numeric(performance(ROCRpred, "auc")@y.values)
+
+# Podriamos ver el AUC para el test y ver posible resultado tendríamos
+ROCRpred = prediction(predict.random.test, testSparse$Happy);
+as.numeric(performance(ROCRpred, "auc")@y.values)
 
 # podemos ver tambien que sucede si solo utilizamos la variables votes
 votes.rpart   <- rpart(Happy ~ votes + Income, data=trainSparse[,-2], method="class")
 predict.votes <- predict(votes.rpart)[,2]
 getAcc(table(trainSparse$Happy, predict.votes > 0.5))
 prp(votes.rpart)
+# vemos que podemos encontrar con solo los votos
+ROCRpred = prediction(predict.votes, trainSparse$Happy);
+as.numeric(performance(ROCRpred, "auc")@y.values)
 
 # podriamos intentar ver cuales son las preguntas a las que la gente mas responde la gente para incluirlas
 # dentro de nuestro modelo.
